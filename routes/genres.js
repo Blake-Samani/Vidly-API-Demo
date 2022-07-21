@@ -1,7 +1,9 @@
 const express = require('express');
+const auth = require('../middleware/auth');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { Genre, validate } = require('../models/genre');
+const admin = require('../middleware/admin');
 
 
 router.get('/', async (req, res) => {//find all genres
@@ -13,7 +15,9 @@ router.get('/', async (req, res) => {//find all genres
 
 
 //adding new genre
-router.post('/', async (req, res) => { // updating the genre object
+//auth is passed as a middleware function to be executed before the next function in post, which is a route handler
+router.post('/', auth, async (req, res) => { // updating the genre object
+    //we need to make sure only authorized users can add new genres
     const { error } = validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
@@ -49,7 +53,8 @@ router.put('/:id', async (req, res) => {
 });
 
 //handling http delete requests
-router.delete('/:id', async (req, res) => {
+//passing two middleware functions here and they are executed in sequeance, auth->admin->our async delete function
+router.delete('/:id', [auth, admin], async (req, res) => {
     const genre = await Genre.findByIdAndRemove(req.params.id);
 
     if (!genre) return res.status(404).send('The genre with given ID was not found'); //404 object not found, if we didnt match the ids from earlier, a genre wont exist

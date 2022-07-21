@@ -1,13 +1,20 @@
+const config = require('config');
 const Joi = require('joi'); //adding joiobjectid here allows us to use it globally
 Joi.objectId = require('joi-objectid')(Joi);
 const mongoose = require('mongoose');
 const express = require('express');
-
 const app = express();
 const genres = require('./routes/genres');
 const customers = require('./routes/customers');
 const movies = require('./routes/movies');
 const rentals = require('./routes/rentals');
+const users = require('./routes/users');
+const auth = require('./routes/auth');
+
+if (!config.get('jwtPrivateKey')) {
+    console.error('FATAL ERROR: jwtPrivateKey is not defined.');
+    process.exit(1);
+}
 
 mongoose.connect('mongodb://localhost/vidly') //vidly is name of our database
     .then(() => console.log('Connected to MongoDB..'))
@@ -19,6 +26,8 @@ app.use('/api/genres', genres); //delegate router
 app.use('/api/customers', customers);
 app.use('/api/movies', movies);
 app.use('/api/rentals', rentals);
+app.use('/api/users', users);
+app.use('/api/auth', auth);
 
 
 const port = process.env.PORT || 3000; //the the PORT environment variable has been set, we will use that, otherwise use 3000
