@@ -1,34 +1,12 @@
-const config = require('config');
-const Joi = require('joi'); //adding joiobjectid here allows us to use it globally
-Joi.objectId = require('joi-objectid')(Joi);
-const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
-const genres = require('./routes/genres');
-const customers = require('./routes/customers');
-const movies = require('./routes/movies');
-const rentals = require('./routes/rentals');
-const users = require('./routes/users');
-const auth = require('./routes/auth');
+const winston = require('winston');
 
-if (!config.get('jwtPrivateKey')) {
-    console.error('FATAL ERROR: jwtPrivateKey is not defined.');
-    process.exit(1);
-}
-
-mongoose.connect('mongodb://localhost/vidly') //vidly is name of our database
-    .then(() => console.log('Connected to MongoDB..'))
-    .catch(err => console.error('Could not connecto to MongoDb..', err));
-
-
-app.use(express.json());
-app.use('/api/genres', genres); //delegate router
-app.use('/api/customers', customers);
-app.use('/api/movies', movies);
-app.use('/api/rentals', rentals);
-app.use('/api/users', users);
-app.use('/api/auth', auth);
-
+require('./startup/logging');
+require('./startup/routes')(app); //here, our require is pointed to a function that we are passing our app object to
+require('./startup/db')();
+require('./startup/config')();
+require('./startup/validation')();
 
 const port = process.env.PORT || 3000; //the the PORT environment variable has been set, we will use that, otherwise use 3000
-app.listen(port, () => console.log(`Listening on port ${port}..`)); // when listening on port 3000, the lambda function will be called
+app.listen(port, () => winston.info(`Listening on port ${port}..`)); // when listening on port 3000, the lambda function will be called
