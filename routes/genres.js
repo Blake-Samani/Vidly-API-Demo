@@ -4,6 +4,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { Genre, validate } = require('../models/genre');
 const admin = require('../middleware/admin');
+const validateObjectId = require('../middleware/validateObjectId');
 
 router.get('/', async (req, res) => {//find all genres
     // throw new Error('could not get genre');
@@ -27,7 +28,8 @@ router.post('/', auth, async (req, res) => { // updating the genre object
 });
 
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateObjectId, async (req, res) => {
+
     const genre = await Genre.findById(req.params.id);
 
     if (!genre) return res.status(404).send('The genre with given ID was not found'); //404 object not found, if we didnt match the ids from earlier, a genre wont exist
