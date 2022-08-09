@@ -14,7 +14,7 @@ describe('/api/genres', () => {
     });
     afterEach(async () => {
         //close server
-        server.close();
+        await server.close();
         await Genre.remove({}); // removes all genres from databse that we created
 
     });
@@ -123,4 +123,6 @@ describe('/api/genres', () => {
 
 
     });
+
+
 });
